@@ -35,7 +35,7 @@ def export_excel(df):
 df = muat_data()
 
 st.title("🏘️ Sistem Informasi Kas & Iuran RT")
-st.markdown("Aplikasi web untuk mencatat pemasukan iuran warga dan pengeluaran operasional.")
+st.markdown("Aplikasi web untuk mencatat administrasi keuangan dan iuran warga kawasan Babelan dan sekitarnya.")
 
 # ==========================================
 # NAVIGASI TAB
@@ -62,9 +62,16 @@ with tab1:
         
         # Grafik sederhana menggunakan chart bawaan Streamlit
         st.subheader("Grafik Arus Kas")
-        df['Tanggal'] = pd.to_datetime(df['Tanggal'])
-        df_group = df.groupby(['Tanggal', 'Jenis'])['Nominal'].sum().unstack().fillna(0)
-        st.bar_chart(df_group)
+        
+        # PERBAIKAN: Menangani error format tanggal & menghapus baris yang gagal dikonversi
+        df['Tanggal'] = pd.to_datetime(df['Tanggal'], errors='coerce')
+        df_grafik = df.dropna(subset=['Tanggal']).copy()
+        
+        if not df_grafik.empty:
+            df_group = df_grafik.groupby(['Tanggal', 'Jenis'])['Nominal'].sum().unstack().fillna(0)
+            st.bar_chart(df_group)
+        else:
+            st.info("Belum ada data tanggal yang valid untuk ditampilkan di grafik.")
     else:
         st.info("Belum ada data transaksi yang tercatat. Silakan input data terlebih dahulu.")
 
